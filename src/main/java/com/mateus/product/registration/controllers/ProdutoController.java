@@ -1,19 +1,20 @@
 package com.mateus.product.registration.controllers;
 
-import com.mateus.product.registration.controllers.dto.ProdutoFindByIdDto;
+import com.mateus.product.registration.dto.ProdutoCreateDto;
+import com.mateus.product.registration.dto.ProdutoFindByIdDto;
+import com.mateus.product.registration.dto.ProdutoShowDto;
 import com.mateus.product.registration.services.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/produto")
 public class ProdutoController {
 
-    private ProdutoService produtoService;
+    private final ProdutoService produtoService;
 
     @Autowired
     public ProdutoController(ProdutoService produtoService) {
@@ -21,8 +22,32 @@ public class ProdutoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProdutoFindByIdDto> findById(@PathVariable Long id) {
+    public ResponseEntity<ProdutoFindByIdDto> searchById(@PathVariable Long id) {
         final var produto = produtoService.findById(id);
         return ResponseEntity.ok().body(produto);
+    }
+
+    @GetMapping("/nome/{nome}")
+    public ResponseEntity<ProdutoShowDto> searchByName(@PathVariable String nome) {
+        final var produto = produtoService.findByName(nome);
+        return ResponseEntity.ok().body(produto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProdutoCreateDto> update(@PathVariable Long id, @RequestBody @Valid ProdutoCreateDto produtoUpdateDto) {
+        final var produto = produtoService.updateProduto(id, produtoUpdateDto.toProdutoEntity());
+        return ResponseEntity.ok().body(produto);
+    }
+
+    @PostMapping
+    public ResponseEntity<ProdutoCreateDto> store(@RequestBody @Valid ProdutoCreateDto produtoCreateDTO) {
+        final var produto = produtoService.createProduto(produtoCreateDTO.toProdutoEntity());
+        return ResponseEntity.ok().body(produto);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        produtoService.delete(id);
+        return ResponseEntity.ok().build();
     }
 }

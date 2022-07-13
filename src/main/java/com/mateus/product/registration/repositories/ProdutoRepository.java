@@ -4,18 +4,19 @@ import com.mateus.product.registration.models.ProdutoEntity;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
 public class ProdutoRepository {
     Connection con;
+
     public void abrirConexao() {
         try {
+            Class.forName("org.postgresql.Driver");
             con = DriverManager
                     .getConnection("jdbc:postgresql://localhost:5433/postgres", "postgres", "123");
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -29,31 +30,120 @@ public class ProdutoRepository {
         }
     }
 
-    public Optional<ProdutoEntity> findByIdDto(Long id) {
+    public ProdutoEntity create(ProdutoEntity produto) {
         abrirConexao();
-        List<ProdutoEntity> produtos = new ArrayList<>();
-        try (Statement stmt = con.createStatement()) {
-            String selectSql = "SELECT \"ID\", \"NOME\", \"PRECO\", \"QUANTIDADE\", \"DATA_CRIACAO\"\n" +
-                    "\tFROM public.\"PRODUTO\"";
-            try (ResultSet resultSet = stmt.executeQuery(selectSql)) {
-                while (resultSet.next()) {
-                    ProdutoEntity produto = new ProdutoEntity(
-                            resultSet.getLong("ID"),
-                            resultSet.getString("NOME"),
-                            resultSet.getBigDecimal("PRECO"),
-                            resultSet.getInt("QUANTIDADE"),
-                            resultSet.getDate("DATA_CRIACAO"));
-                    produtos.add(produto);
+        String sql = "INSERT INTO public.\"PRODUTO\"(\"NOME\", \"PRECO\", \"QUANTIDADE\", \"DATA_CRIACAO\")VALUES (?, ?, ?, ?)";
+        try {
+            PreparedStatement pstm = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            pstm.setString(1, produto.getNome());
+            pstm.setBigDecimal(2, produto.getPreco());
+            pstm.setInt(3, produto.getQuantidade());
+            pstm.setDate(4, Date.valueOf(produto.getDataCriacao()));
+            pstm.execute();
+            try (ResultSet rst = pstm.getGeneratedKeys()) {
+                while (rst.next()) {
+                    produto.setId(rst.getLong(1));
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
+            pstm.close();
 
         } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            fecharConexao();
+            throw new RuntimeException(e);
         }
-        return produtos.isEmpty() == true ? Optional.empty() : Optional.of(produtos.get(0));
+        return new ProdutoEntity(
+                produto.getId(),
+                produto.getNome(),
+                produto.getPreco(),
+                produto.getQuantidade(),
+                produto.getDataCriacao()
+        );
     }
+
+    public ProdutoEntity update(Long id, ProdutoEntity produto) {
+        abrirConexao();
+        String sql = "UPDATE public.\"PRODUTO\" SET \"NOME\"=?, \"PRECO\"=?, \"QUANTIDADE\"=?, \"DATA_CRIACAO\"=? WHERE \"ID\" =? ";
+        try {
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, produto.getNome());
+            stmt.setBigDecimal(2, produto.getPreco());
+            stmt.setInt(3, produto.getQuantidade());
+            stmt.setDate(4, Date.valueOf(produto.getDataCriacao()));
+            stmt.setLong(5, id);
+            stmt.execute();
+            fecharConexao();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return new ProdutoEntity(
+                produto.getId(),
+                produto.getNome(),
+                produto.getPreco(),
+                produto.getQuantidade(),
+                produto.getDataCriacao()
+        );
+    }
+
+    public Optional<ProdutoEntity> findByIdDto(Long id) {
+        abrirConexao();
+        try {
+            String sql = "SELECT * FROM public.\"PRODUTO\" WHERE \"ID\" =?";
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setLong(1, id);
+            ResultSet rs = stmt.executeQuery();
+            ProdutoEntity produto = new ProdutoEntity();
+            while (rs.next()) {
+                produto.setId(rs.getLong("ID"));
+                produto.setNome(rs.getString("NOME"));
+                produto.setPreco(rs.getBigDecimal("PRECO"));
+                produto.setQuantidade(rs.getInt("QUANTIDADE"));
+                produto.setDataCriacao(LocalDate.parse(rs.getDate("DATA_CRIACAO").toString()));
+            }
+            stmt.close();
+            rs.close();
+            fecharConexao();
+            return Optional.of(produto);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<ProdutoEntity> findByName(String nome) {
+        abrirConexao();
+        try {
+            String sql = "\n" +
+                    "SELECT \"ID\", \"NOME\", \"PRECO\", \"QUANTIDADE\", \"DATA_CRIACAO\" FROM public.\"PRODUTO\" WHERE UPPER(\"NOME\") = UPPER(?)";
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, nome);
+            ResultSet rs = stmt.executeQuery();
+            ProdutoEntity produto = new ProdutoEntity();
+            while (rs.next()) {
+                produto.setId(rs.getLong("ID"));
+                produto.setNome(rs.getString("NOME"));
+                produto.setPreco(rs.getBigDecimal("PRECO"));
+                produto.setQuantidade(rs.getInt("QUANTIDADE"));
+                produto.setDataCriacao(LocalDate.parse(rs.getDate("DATA_CRIACAO").toString()));
+            }
+            stmt.close();
+            rs.close();
+            fecharConexao();
+            return Optional.of(produto);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void deletar(Long id) {
+        abrirConexao();
+        try (PreparedStatement stm = con.prepareStatement("DELETE FROM public.\"PRODUTO\" WHERE \"ID\" =?")) {
+            stm.setLong(1, id);
+            stm.execute();
+            fecharConexao();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
