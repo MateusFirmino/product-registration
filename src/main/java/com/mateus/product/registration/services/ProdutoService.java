@@ -1,9 +1,9 @@
 package com.mateus.product.registration.services;
 
 import com.mateus.product.registration.dto.ProdutoCreateDto;
-import com.mateus.product.registration.dto.ProdutoFindByIdDto;
-import com.mateus.product.registration.dto.ProdutoShowDto;
-import com.mateus.product.registration.exceptions.NegocioException;
+import com.mateus.product.registration.dto.ProdutoFindByParameterDto;
+import com.mateus.product.registration.enumarator.AplicacaoMensagemEnum;
+import com.mateus.product.registration.exceptions.RegistroNaoEncontradoException;
 import com.mateus.product.registration.models.ProdutoEntity;
 import com.mateus.product.registration.repositories.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProdutoService {
-
+    private static final String NAO_ENCONTRADO = AplicacaoMensagemEnum.X0_NAO_ENCONTRADO.trataMensagem("Produto");
     private final ProdutoRepository repository;
 
     @Autowired
@@ -20,16 +20,16 @@ public class ProdutoService {
         this.repository = repository;
     }
 
-    public ProdutoFindByIdDto findById(Long id) {
+    public ProdutoFindByParameterDto findById(Long id) {
         final var produto = repository.findByIdDto(id)
-                .orElseThrow(() -> new NegocioException("Produto com Id " + id + " não encontrado"));
-        return new ProdutoFindByIdDto(produto);
+                .orElseThrow(() -> new RegistroNaoEncontradoException(NAO_ENCONTRADO));
+        return new ProdutoFindByParameterDto(produto);
     }
 
-    public ProdutoShowDto findByName(String nome) {
+    public ProdutoFindByParameterDto findByName(String nome) {
         final var produto = repository.findByName(nome)
-                .orElseThrow(() -> new NegocioException("Produto com Nome " + nome + " não encontrado"));
-        return new ProdutoShowDto(produto);
+                .orElseThrow(() -> new RegistroNaoEncontradoException(NAO_ENCONTRADO));
+        return new ProdutoFindByParameterDto(produto);
     }
 
     public ProdutoCreateDto updateProduto(Long id, ProdutoEntity produto) {

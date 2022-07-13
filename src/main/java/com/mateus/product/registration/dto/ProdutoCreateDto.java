@@ -12,14 +12,16 @@ public class ProdutoCreateDto {
 
     private Long id;
 
+    @NotNull
     private String nome;
 
+    @NotNull
     private BigDecimal preco;
 
     @Min(value = 50, message = "Quantidade precisa ser maior que 50")
     @NotNull
     private Integer quantidade;
-
+    @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataCriacao;
 

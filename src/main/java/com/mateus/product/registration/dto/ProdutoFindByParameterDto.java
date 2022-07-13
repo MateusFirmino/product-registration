@@ -6,7 +6,7 @@ import com.mateus.product.registration.models.ProdutoEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class ProdutoFindByIdDto {
+public class ProdutoFindByParameterDto {
 
     private Long id;
     private String nome;
@@ -16,7 +16,7 @@ public class ProdutoFindByIdDto {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataCriacao;
 
-    public ProdutoFindByIdDto(ProdutoEntity produtoEntity) {
+    public ProdutoFindByParameterDto(ProdutoEntity produtoEntity) {
         this.id = produtoEntity.getId();
         this.nome = produtoEntity.getNome();
         this.preco = produtoEntity.getPreco();

@@ -1,8 +1,7 @@
 package com.mateus.product.registration.controllers;
 
 import com.mateus.product.registration.dto.ProdutoCreateDto;
-import com.mateus.product.registration.dto.ProdutoFindByIdDto;
-import com.mateus.product.registration.dto.ProdutoShowDto;
+import com.mateus.product.registration.dto.ProdutoFindByParameterDto;
 import com.mateus.product.registration.services.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +12,6 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping(value = "/produto")
 public class ProdutoController {
-
     private final ProdutoService produtoService;
 
     @Autowired
@@ -22,13 +20,13 @@ public class ProdutoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProdutoFindByIdDto> searchById(@PathVariable Long id) {
+    public ResponseEntity<ProdutoFindByParameterDto> searchById(@PathVariable Long id) {
         final var produto = produtoService.findById(id);
         return ResponseEntity.ok().body(produto);
     }
 
-    @GetMapping("/nome/{nome}")
-    public ResponseEntity<ProdutoShowDto> searchByName(@PathVariable String nome) {
+    @GetMapping("/nome")
+    public ResponseEntity<ProdutoFindByParameterDto> searchByName(@RequestParam(required = true) String nome) {
         final var produto = produtoService.findByName(nome);
         return ResponseEntity.ok().body(produto);
     }

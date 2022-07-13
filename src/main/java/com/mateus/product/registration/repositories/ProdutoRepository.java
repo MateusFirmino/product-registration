@@ -91,14 +91,14 @@ public class ProdutoRepository {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setLong(1, id);
             ResultSet rs = stmt.executeQuery();
+            if (!rs.next())
+                return Optional.empty();
             ProdutoEntity produto = new ProdutoEntity();
-            while (rs.next()) {
-                produto.setId(rs.getLong("ID"));
-                produto.setNome(rs.getString("NOME"));
-                produto.setPreco(rs.getBigDecimal("PRECO"));
-                produto.setQuantidade(rs.getInt("QUANTIDADE"));
-                produto.setDataCriacao(LocalDate.parse(rs.getDate("DATA_CRIACAO").toString()));
-            }
+            produto.setId(rs.getLong("ID"));
+            produto.setNome(rs.getString("NOME"));
+            produto.setPreco(rs.getBigDecimal("PRECO"));
+            produto.setQuantidade(rs.getInt("QUANTIDADE"));
+            produto.setDataCriacao(LocalDate.parse(rs.getDate("DATA_CRIACAO").toString()));
             stmt.close();
             rs.close();
             fecharConexao();
@@ -109,6 +109,7 @@ public class ProdutoRepository {
         }
     }
 
+
     public Optional<ProdutoEntity> findByName(String nome) {
         abrirConexao();
         try {
@@ -118,13 +119,13 @@ public class ProdutoRepository {
             stmt.setString(1, nome);
             ResultSet rs = stmt.executeQuery();
             ProdutoEntity produto = new ProdutoEntity();
-            while (rs.next()) {
-                produto.setId(rs.getLong("ID"));
-                produto.setNome(rs.getString("NOME"));
-                produto.setPreco(rs.getBigDecimal("PRECO"));
-                produto.setQuantidade(rs.getInt("QUANTIDADE"));
-                produto.setDataCriacao(LocalDate.parse(rs.getDate("DATA_CRIACAO").toString()));
-            }
+            if (!rs.next())
+                return Optional.empty();
+            produto.setId(rs.getLong("ID"));
+            produto.setNome(rs.getString("NOME"));
+            produto.setPreco(rs.getBigDecimal("PRECO"));
+            produto.setQuantidade(rs.getInt("QUANTIDADE"));
+            produto.setDataCriacao(LocalDate.parse(rs.getDate("DATA_CRIACAO").toString()));
             stmt.close();
             rs.close();
             fecharConexao();
