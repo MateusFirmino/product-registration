@@ -1,22 +1,37 @@
-package com.mateus.product.registration.controllers.dto;
+package com.mateus.product.registration.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mateus.product.registration.models.ProdutoEntity;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class ProdutoFindByIdDto {
+public class ProdutoCreateDto {
 
     private Long id;
+
     private String nome;
+
     private BigDecimal preco;
+
+    @Min(value = 50, message = "Quantidade precisa ser maior que 50")
+    @NotNull
     private Integer quantidade;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataCriacao;
 
-    public ProdutoFindByIdDto(ProdutoEntity produtoEntity) {
+    public ProdutoCreateDto(Long id, String nome, BigDecimal preco, Integer quantidade, LocalDate dataCriacao) {
+        this.id = id;
+        this.nome = nome;
+        this.preco = preco;
+        this.quantidade = quantidade;
+        this.dataCriacao = dataCriacao;
+    }
+
+    public ProdutoCreateDto(ProdutoEntity produtoEntity) {
         this.id = produtoEntity.getId();
         this.nome = produtoEntity.getNome();
         this.preco = produtoEntity.getPreco();
@@ -62,5 +77,15 @@ public class ProdutoFindByIdDto {
 
     public void setDataCriacao(LocalDate dataCriacao) {
         this.dataCriacao = dataCriacao;
+    }
+
+    public ProdutoEntity toProdutoEntity() {
+        return new ProdutoEntity(
+                this.id,
+                this.nome,
+                this.preco,
+                this.quantidade,
+                this.dataCriacao
+        );
     }
 }

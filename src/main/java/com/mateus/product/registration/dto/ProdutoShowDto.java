@@ -1,28 +1,27 @@
-package com.mateus.product.registration.models;
+package com.mateus.product.registration.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.mateus.product.registration.models.ProdutoEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class ProdutoEntity {
+public class ProdutoShowDto {
+
     private Long id;
-
     private String nome;
-
     private BigDecimal preco;
-
     private Integer quantidade;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataCriacao;
 
-    public ProdutoEntity() {
-    }
-
-    public ProdutoEntity(Long id, String nome, BigDecimal preco, Integer quantidade, LocalDate dataCriacao) {
-        this.id = id;
-        this.nome = nome;
-        this.preco = preco;
-        this.quantidade = quantidade;
-        this.dataCriacao = dataCriacao;
+    public ProdutoShowDto(ProdutoEntity produtoEntity) {
+        this.id = produtoEntity.getId();
+        this.nome = produtoEntity.getNome();
+        this.preco = produtoEntity.getPreco();
+        this.quantidade = produtoEntity.getQuantidade();
+        this.dataCriacao = produtoEntity.getDataCriacao();
     }
 
     public Long getId() {
@@ -64,5 +63,4 @@ public class ProdutoEntity {
     public void setDataCriacao(LocalDate dataCriacao) {
         this.dataCriacao = dataCriacao;
     }
-
 }
